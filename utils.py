@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pandas as pd
 import gurobipy as gp
 from gurobipy import GRB 
 
@@ -84,3 +85,8 @@ def aggregate_refund_to_exact_refund(refunds_issued_agg, users_aggregate, users_
 
     return refund_exact
     
+
+def save_log(log, fname='results.csv'):
+    df = pd.DataFrame(log)
+    df.to_csv(fname, index=False)
+    return None

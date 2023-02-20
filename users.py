@@ -8,11 +8,6 @@ class Users:
 
     def __init__(self, city, aggregate=True):
         assert isinstance(city, str)
-        self.city_scaling = {'Pigou_expanded': 1,
-                             'Series_parallel': 1,
-                             'Grid': 1,
-                             'Pigou_bpr': 1}  # scale user flows to ensure
-        # feasibility
         self.city = city
         if aggregate:
             self.raw_od = pd.read_csv("Locations/" + city + "/od.csv")
@@ -25,15 +20,13 @@ class Users:
 
     def _generate_users(self):
 
-        splits = 1
-        df = pd.DataFrame(np.repeat(self.raw_od.values, splits, axis=0), columns=self.raw_od.columns)
-        self.num_users = splits * df.shape[0]
+        df = self.raw_od
+        self.num_users = df.shape[0]
         self.vot_mean_array = df['vot'].to_numpy() # CHECK!
 
-        df['volume'] = round(self.city_scaling[self.city] * df['volume']/splits)
         df['vot'] = self.vot_realization()
 
-        df.rename(columns={"origin": "orig", "destination": "dest", "volume": "vol", "vot": "vot"}, inplace=True)
+        df.rename(columns={"origin": "orig", "destination": "dest", "volume": "vol", "vot": "vot", "income": "income"}, inplace=True)
         data = df.to_dict('index')
         return data
 
@@ -44,6 +37,14 @@ class Users:
     def vot_array(self):
         vot = [self.data[i]['vot'] for i in range(len(self.data))]
         return np.array(vot)
+
+    def income_list(self):
+        income = [self.data[i]['income'] for i in range(len(self.data))]
+        return income
+
+    def income_array(self):
+        income = [self.data[i]['income'] for i in range(len(self.data))]
+        return np.array(income)
 
     def user_flow_list(self):
         user_flow = [self.data[i]['vol'] for i in range(len(self.data))]

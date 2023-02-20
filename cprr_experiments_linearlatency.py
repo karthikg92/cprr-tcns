@@ -9,6 +9,10 @@ from utils import *
 
 def cprr_experiment_linearlatency(road_network):
 
+    output_results = {'experiment':road_network}
+
+    print("---- ", road_network, ' ----')
+
     PRINT_FLAG = False
 
     # users for the experiment
@@ -59,6 +63,10 @@ def cprr_experiment_linearlatency(road_network):
     print("Complete info cost: ", min_cost_complete_info)
     print("Aggregate info cost: ", min_cost_agg_info)
 
+    output_results['complete_info'] = min_cost_complete_info
+    output_results['agg_info'] = min_cost_agg_info
+    
+
     if PRINT_FLAG:
         print("Sanity check: ", min_cost_complete_info_sanitycheck)
         print("Optimal flows")
@@ -84,9 +92,11 @@ def cprr_experiment_linearlatency(road_network):
     C_star = min_cost_complete_info
 
     # Compute GC of initial income distribution
-    initial_income_exact = 1000*users_exact.vot_array()
+    initial_income_exact = users_exact.income_array()
     gc_initial = compute_gini(initial_income_exact)
     print("Initial GC = ", gc_initial)
+
+    output_results['initial_gc'] = gc_initial
 
     # Compute GC of Incomes of users after they pay a cost to form the UE outcome (with no tolls)
         # compute UE with no tolls (i.e., total system cost as well as flows for each group -- C0)
@@ -104,6 +114,8 @@ def cprr_experiment_linearlatency(road_network):
         cost_per_group_notoll_ue[g] = sum(edge_tt[e] * x_notoll_ue[e,g] * users_exact.vot_array()[g] for e in range(len(f_opt)))/ users_exact.user_flow_list()[g] 
     
     print("User equilibrium no tolls, complete information cost = ", C0)
+    output_results['c0'] = C0
+
     if PRINT_FLAG:
         print("Cost per group after no toll UE")
         print(cost_per_group_notoll_ue)
@@ -129,6 +141,7 @@ def cprr_experiment_linearlatency(road_network):
     gc_after_refund = compute_gini(income_after_refunds)
 
     print("GC after exact refunds= ", gc_after_refund )
+    output_results['gc_after_exact_refund'] = gc_after_refund
 
     # Approx:
         # \hat{C}* = min system cost based on approx VOT info
@@ -138,7 +151,7 @@ def cprr_experiment_linearlatency(road_network):
 
     # print("------- Aggregate approximation ---------")
 
-    initial_income_agg = 1000*users_aggregate.vot_array()
+    initial_income_agg = users_aggregate.income_array()
 
     x_agg_ue, f_agg_ue = ue_with_tolls_linearlatency(network, users_aggregate, np.zeros(len(f_opt)))
     edge_tt_ue = bpr_linearlatency(f_agg_ue, network.capacity_array(), network.latency_array(), network.latency_slope)
@@ -182,6 +195,8 @@ def cprr_experiment_linearlatency(road_network):
 
     print("GC after aggregate refunds = ", gc_after_refund_agg )
 
+    output_results['gc_after_agg_refund'] = gc_after_refund_agg
+
     # print("---- Debug ------")
     # print("C0:", C0)
     # print("C0_hat:", C0_hat)
@@ -189,7 +204,9 @@ def cprr_experiment_linearlatency(road_network):
     # print("C_star:", C_star)
     # print("C_star_hat:", C_star_hat)
 
-    return None
+    print('\n')
+
+    return output_results
     
 def bpr_linearlatency(f, capacity, free_flow_latency, latency_slope):
     """
