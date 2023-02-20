@@ -126,6 +126,7 @@ def cprr_experiment_linearlatency(road_network):
         print("Income after UE")
         print(income_after_notoll_ue)
     gc_after_ue = compute_gini(income_after_notoll_ue)
+    output_results['ue_notoll_gc'] = gc_after_ue
     if PRINT_FLAG:
         print("Gini coefficient after UE = ", gc_after_ue)
 
